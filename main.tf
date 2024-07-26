@@ -4,6 +4,12 @@ provider "aws" {
 
 variable "env_prefix" {}
 variable "avail_zone" {}
+variable "my_ip_address" {}
+variable "public_key_path" {
+  description = "Path to the ssh public key file"
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
+}
 
 # create VPC
 resource "aws_vpc" "main" {
@@ -89,6 +95,39 @@ resource "aws_network_acl_association" "this" {
   network_acl_id = aws_network_acl.this.id
   subnet_id      = aws_subnet.public.id
 }
+
+resource "aws_security_group" "this" {
+  ingress { //for ssh
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip_address]
+  }
+
+  ingress { // for internet traffic to enter the webserver
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress { // for traffic to leave the intsnace regardless of protocol and ports
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.env_prefix}_sg"
+  }
+}
+
+resource "aws_key_pair" "this" {
+  key_name   = "${var.env_prefix}_key_pair"
+  public_key = file(var.public_key_path)
+}
+
 
 # resource "aws_instance" "this" {
 #     ami_id = "ami-0b72821e2f351e396"
