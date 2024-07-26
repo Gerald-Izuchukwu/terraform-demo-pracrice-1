@@ -61,7 +61,34 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public_route_table.id
 }
 
+resource "aws_network_acl" "this" {
+  vpc_id = aws_vpc.main.id
+  egress { //https traffic to the internet from the subnet
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 443
+    to_port    = 443
+  }
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "10.0.0.0/24"
+    from_port  = 0
+    to_port    = 65535
+  }
 
+  tags = {
+    Name = "${var.env_prefix}_nacl"
+  }
+}
+
+resource "aws_network_acl_association" "this" {
+  network_acl_id = aws_network_acl.this.id
+  subnet_id      = aws_subnet.public.id
+}
 
 # resource "aws_instance" "this" {
 #     ami_id = "ami-0b72821e2f351e396"
@@ -70,8 +97,22 @@ resource "aws_route_table_association" "public" {
 #     }
 # }
 
-# -------- below this is config for private subnet and 
-# NAT-GW but NAT-GW isnt free
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# -------- below this is config for private subnet and NAT-GW but NAT-GW isnt free
 
 # resource "aws_subnet" "private" {
 #   vpc_id            = aws_vpc.main.id
