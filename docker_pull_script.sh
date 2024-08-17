@@ -27,8 +27,11 @@ echo "Image pulled successfully!"
 sudo docker tag public.ecr.aws/$REPOSITORY_ID/$REPOSITORY_NAME:$IMAGE_TAG $REPOSITORY_NAME:1
 sudo docker tag public.ecr.aws/$REPOSITORY_ID/$REPOSITORY_NAME2:$IMAGE_TAG $REPOSITORY_NAME2:1
 
-sudo docker run -d -p 9661:9661 $REPOSITORY_NAME:1
-sudo docker run -d -p 9660:9660 $REPOSITORY_NAME2:1
+sudo docker network create mynetwork
 
+sudo docker run -d -p 9661:9661 --network mynetwork --name crossa $REPOSITORY_NAME:1 #chnage the -ne to --net
+sudo docker run -d -p 9660:9660 --network mynetwork --name crossb $REPOSITORY_NAME2:1
+
+# sudo docker compose up -d
 
 echo "Running image"

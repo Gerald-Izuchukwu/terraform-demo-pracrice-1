@@ -1,0 +1,19 @@
+version: '3' 
+services:
+  crossa:
+    image: cross_a:1.0
+    container_name: crossa
+    networks:
+      - mynetwork
+    ports:
+      - 9661:9661
+  crossb:
+    image: cross_b:1.0
+    container_name: crossb
+    networks:
+      - mynetwork
+    ports:
+      - 9660:9660
+networks:
+  mynetwork:
+    driver: bridge

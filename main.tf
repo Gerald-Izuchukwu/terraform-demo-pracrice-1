@@ -127,7 +127,19 @@ resource "aws_security_group" "this" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress { // for internet traffic to enter the webserver
+    from_port   = 9660
+    to_port     = 9660
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
+  ingress { // for internet traffic to enter the webserver
+    from_port   = 9661
+    to_port     = 9661
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress { // for traffic to leave the intsnace regardless of protocol and ports
     from_port   = 0
     to_port     = 0
@@ -163,6 +175,11 @@ resource "aws_instance" "this" {
   provisioner "file" {
     source      = "docker_pull_script.sh"
     destination = "/home/ec2-user/docker_pull_script.sh"
+  }
+
+    provisioner "file" {
+    source      = "docker-compose.yml"
+    destination = "/home/ec2-user/docker-compose.yml"
   }
 
 
