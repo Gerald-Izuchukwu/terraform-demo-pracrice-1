@@ -140,6 +140,30 @@ resource "aws_security_group" "this" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress { // for internet traffic to enter the webserver
+    from_port   = 9600
+    to_port     = 9600
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress { // for internet traffic to enter the webserver
+    from_port   = 9601
+    to_port     = 9601
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress { // for internet traffic to enter the webserver
+    from_port   = 9602
+    to_port     = 9602
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress { // for internet traffic to enter the webserver
+    from_port   = 9603
+    to_port     = 9603
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress { // for traffic to leave the intsnace regardless of protocol and ports
     from_port   = 0
     to_port     = 0
@@ -177,7 +201,7 @@ resource "aws_instance" "this" {
     destination = "/home/ec2-user/docker_pull_script.sh"
   }
 
-    provisioner "file" {
+  provisioner "file" {
     source      = "docker-compose.yml"
     destination = "/home/ec2-user/docker-compose.yml"
   }
@@ -199,7 +223,140 @@ resource "aws_instance" "this" {
     host        = self.public_ip
   }
 }
+resource "aws_instance" "user_service" {
+  count                       = 1
+  ami                         = "ami-0b72821e2f351e396"
+  instance_type               = "t2.micro"
+  key_name                    = aws_key_pair.this.key_name
+  availability_zone           = var.avail_zone
+  subnet_id                   = aws_subnet.public.id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.this.id]
+  user_data                   = file("entry_script.sh")
+  tags = {
+    Name = "user_service"
+  }
 
+    provisioner "file" {
+    source      = "userServicePullScript.sh"
+    destination = "/home/ec2-user/userServicePullScript.sh"
+  }
+
+  provisioner "file" {
+    source      = "docker-compose.yml"
+    destination = "/home/ec2-user/docker-compose.yml"
+  }
+
+
+  provisioner "remote-exec" {
+    inline = [
+      "while ! systemctl is-active docker; do sleep 5; done", # Wait until Docker is active
+      "chmod +x /home/ec2-user/userServicePullScript.sh",
+      "/home/ec2-user/userServicePullScript.sh"
+    ]
+  }
+}
+
+resource "aws_instance" "order_service" {
+  count                       = 1
+  ami                         = "ami-0b72821e2f351e396"
+  instance_type               = "t2.micro"
+  key_name                    = aws_key_pair.this.key_name
+  availability_zone           = var.avail_zone
+  subnet_id                   = aws_subnet.public.id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.this.id]
+  user_data                   = file("entry_script.sh")
+  tags = {
+    Name = "order_service"
+  }
+
+    provisioner "file" {
+    source      = "orderServicePullScript.sh"
+    destination = "/home/ec2-user/orderServicePullScript.sh"
+  }
+
+  provisioner "file" {
+    source      = "docker-compose.yml"
+    destination = "/home/ec2-user/docker-compose.yml"
+  }
+
+
+  provisioner "remote-exec" {
+    inline = [
+      "while ! systemctl is-active docker; do sleep 5; done", # Wait until Docker is active
+      "chmod +x /home/ec2-user/orderServicePullScript.sh",
+      "/home/ec2-user/orderServicePullScript.sh"
+    ]
+  }
+}
+
+resource "aws_instance" "product_service" {
+  count                       = 1
+  ami                         = "ami-0b72821e2f351e396"
+  instance_type               = "t2.micro"
+  key_name                    = aws_key_pair.this.key_name
+  availability_zone           = var.avail_zone
+  subnet_id                   = aws_subnet.public.id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.this.id]
+  user_data                   = file("entry_script.sh")
+  tags = {
+    Name = "product_service"
+  }
+    provisioner "file" {
+    source      = "productSercvicePullScript.sh"
+    destination = "/home/ec2-user/productSercvicePullScript.sh"
+  }
+
+  provisioner "file" {
+    source      = "docker-compose.yml"
+    destination = "/home/ec2-user/docker-compose.yml"
+  }
+
+
+  provisioner "remote-exec" {
+    inline = [
+      "while ! systemctl is-active docker; do sleep 5; done", # Wait until Docker is active
+      "chmod +x /home/ec2-user/productSercvicePullScript.sh",
+      "/home/ec2-user/productSercvicePullScript.sh"
+    ]
+  }
+}
+
+resource "aws_instance" "delivery_service" {
+  count                       = 1
+  ami                         = "ami-0b72821e2f351e396"
+  instance_type               = "t2.micro"
+  key_name                    = aws_key_pair.this.key_name
+  availability_zone           = var.avail_zone
+  subnet_id                   = aws_subnet.public.id
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.this.id]
+  user_data                   = file("entry_script.sh")
+  tags = {
+    Name = "delivery_service"
+  }
+
+    provisioner "file" {
+    source      = "deliveryServicePullScript.sh"
+    destination = "/home/ec2-user/deliveryServicePullScript.sh"
+  }
+
+  provisioner "file" {
+    source      = "docker-compose.yml"
+    destination = "/home/ec2-user/docker-compose.yml"
+  }
+
+
+  provisioner "remote-exec" {
+    inline = [
+      "while ! systemctl is-active docker; do sleep 5; done", # Wait until Docker is active
+      "chmod +x /home/ec2-user/deliveryServicePullScript.sh",
+      "/home/ec2-user/deliveryServicePullScript.sh"
+    ]
+  }
+}
 
 
 
